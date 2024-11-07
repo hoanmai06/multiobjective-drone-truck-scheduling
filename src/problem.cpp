@@ -130,7 +130,9 @@ void Truck::serve(int customer) {
 }
 
 double Truck::time_when_go_back_depot() {
-    return _current_time + _problem.distance(_current_node, 0);
+    Truck temp = *this;
+    temp._go(0);
+    return temp._current_time;
 }
 
 void LinearDrone::_go(int customer) {
