@@ -1,5 +1,9 @@
 #include "problem.h"
 
+#include "nlohmann/json.hpp"
+
+using json = nlohmann::json;
+
 Problem Problem::from_file(const std::string &data_path, const TruckConfig& truck_config, const DroneConfig& drone_config) {
     std::ifstream file(data_path);
     if (!file.is_open()) throw std::runtime_error("Can't open file " + data_path);
