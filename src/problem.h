@@ -125,11 +125,8 @@ public:
     // Trả về thời điểm của drone nếu giờ nó đi về depot
     double time_when_go_back_depot();
 
-    // Trả về liệu drone có thể đi tới vị trí của khách này không
-    bool can_go(int customer) const;
-
-    // Trả về liệu drone có thể về depot sau khi tới vị trí của khách này không
-    bool can_go_back_depot_after_serve(int customer) const;
+    // Trả về liệu drone có thể phục vụ khách này không (và vẫn có thể trở về depot)
+    bool can_serve(int customer) const;
 
     // Đưa drone đi phục vụ customer
     void serve(int customer);

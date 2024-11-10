@@ -180,21 +180,17 @@ double LinearDrone::time_when_go_back_depot() {
     return temp.time();
 }
 
-bool LinearDrone::can_go(int customer) const {
+bool LinearDrone::can_serve(int customer) const {
     // Drone không được tới những khách mà drone không serve được
     if (!_problem.can_drone_serve(customer)) return false;
 
     // Thử đi tới đó và kiểm tra xem drone còn valid không
     LinearDrone temp = *this;
     temp.serve(customer);
+    if (!temp._is_valid()) return false;
 
+    temp._go(0);
     return temp._is_valid();
-}
-
-bool LinearDrone::can_go_back_depot_after_serve(int customer) const {
-    LinearDrone temp = *this;
-    temp.serve(customer);
-    return temp.can_go(0);
 }
 
 void LinearDrone::serve(int customer) {
