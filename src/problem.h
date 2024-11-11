@@ -82,6 +82,13 @@ public:
     // problem.truck() sẽ trả về truck ứng với bài toán luôn nên sẽ không cần dùng constructor này
     Truck(const Problem& problem, const TruckConfig& config) : _problem(problem), _config(config) {}
 
+    // Copy assignment
+    Truck& operator=(const Truck& value) {
+        _current_node = value._current_node;
+        _current_time = value._current_time;
+        return *this;
+    }
+
     // Trả về thời điểm hiện tại của truck
     double time() const {return _current_time;}
 

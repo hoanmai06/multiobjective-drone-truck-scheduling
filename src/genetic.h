@@ -30,6 +30,10 @@ public:
 Individual encode(const Solution& solution);
 Solution decode(const Individual& individual);
 
+bool is_drone_routes_valid(const Individual& individual);
+bool is_valid(const Individual& individual);
+Fitness fitness(const Individual& individual);
+
 using CrossoverAlgorithm = std::function<Individual(const Individual&, const Individual&)>;
 using MutationAlgorithm = std::function<Individual(const Individual&)>;
 
