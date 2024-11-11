@@ -150,8 +150,8 @@ Fitness fitness(const Individual &individual) {
     Truck truck = problem.truck();
     truck.serve(individual.permutation_gene.front());
 
-    int index_in_gene, index_in_route = 0;
-    double previous_time = 0;
+    int index_in_gene, customer_count_in_route = 1;
+    double previous_time = truck.time();
 
     // Duyệt qua các đơn còn lại
     for (index_in_gene = 1; index_in_gene < individual.permutation_gene.size(); ++index_in_gene) {
@@ -159,7 +159,7 @@ Fitness fitness(const Individual &individual) {
         if (individual.binary_gene[index_in_gene - 1] == 1) {
             // Lưu lại thời gian về route cũ, thời gian về này được chờ bởi tất cả đơn trước đó
             all_finish_times[route_index] = truck.time_when_go_back_depot();
-            total_wait_time += index_in_route * (all_finish_times[route_index] - previous_time);
+            total_wait_time += customer_count_in_route * (all_finish_times[route_index] - previous_time);
 
             // Nếu đã hết route của truck thì khách này là của drone nên break
             if (++route_index == problem.truck_count()) break;
@@ -167,12 +167,13 @@ Fitness fitness(const Individual &individual) {
             // Không thì khởi tạo lại truck, thời gian và vị trí khách trong route
             truck = problem.truck();
             previous_time = 0;
-            index_in_route = 0;
+            customer_count_in_route = 0;
         }
         truck.serve(individual.permutation_gene[index_in_gene]);
-        total_wait_time = index_in_route * (truck.time() - previous_time);
+        // Thời gian xe đi này được chờ bởi số khách trước đó trong xe
+        total_wait_time += customer_count_in_route * (truck.time() - previous_time);
         previous_time = truck.time();
-        ++index_in_route;
+        ++customer_count_in_route;
     }
 
     // Nếu individual không chứa drone thì trả về luôn
@@ -187,20 +188,32 @@ Fitness fitness(const Individual &individual) {
     // Khởi tạo drone và cho drone đi giao khách đầu tiên
     Drone drone = problem.drone();
     drone.serve(individual.permutation_gene[index_in_gene]);
+    customer_count_in_route = 1;
+    previous_time = 0;
 
     // Duyệt qua các khách của drone
     for (int i = index_in_gene + 1; i < individual.permutation_gene.size(); ++i) {
         // Nếu trước đó là số 1 thì ngắt route, lưu thời gian và reset drone
         if (individual.binary_gene[i - 1] == 1) {
+            // Thời gian đi về depot được chờ bởi mọi khách trong drone
+            total_wait_time += customer_count_in_route * (drone.time_when_go_back_depot() - drone.time());
+            customer_count_in_route = 0;
+            previous_time = 0;
+
             trip_finish_times.emplace_back(drone.time_when_go_back_depot());
             drone = problem.drone();
         }
 
         drone.serve(individual.permutation_gene[i]);
+        // Thời gian drone di chuyển này được chờ bởi các khách trước đó trong drone
+        total_wait_time += customer_count_in_route * (drone.time() - previous_time);
+        previous_time = drone.time();
+        ++customer_count_in_route;
     }
 
     // Đơn cuối vẫn chưa lưu vào mảng nên lưu thủ công đơn cuối (hiện thì đơn chỉ lưu khi binary trước đó là số 1)
     trip_finish_times.emplace_back(drone.time_when_go_back_depot());
+    total_wait_time += customer_count_in_route * (drone.time_when_go_back_depot() - drone.time());
 
     // Sau khi có danh sách các finish_time thì tạo một mảng xem route thứ i trong gene sẽ vào drone thứ bao nhiêu
     std::vector<int> sorted_trip_indices(trip_finish_times.size());

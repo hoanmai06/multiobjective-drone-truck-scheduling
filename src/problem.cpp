@@ -246,10 +246,10 @@ std::pair<double, double> truck_objectives(const Route& route, const Problem& pr
 std::pair<double, double> drone_objectives(const std::vector<Route>& routes, const Problem& problem) {
     double finish_time = 0;
     double total_waiting_time = 0;
-    double previous_time = 0;
 
     // Duyệt qua các chuyến của drone
     for (const Route& route : routes) {
+        double previous_time = 0;
         Drone drone = problem.drone();
 
         // Duyệt qua các khách hàng trong route và phục vụ khách đó

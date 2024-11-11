@@ -17,6 +17,8 @@ int main() {
     individual.binary_gene = {false, false, false, true, true};
 
     Solution solution = decode(individual);
+    solution.objectives();
+    fitness(individual);
 
     return 0;
 }
