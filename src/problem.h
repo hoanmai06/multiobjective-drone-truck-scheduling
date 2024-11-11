@@ -119,6 +119,15 @@ public:
     // problem.drone() sẽ trả về drone ứng với bài toán luôn nên sẽ không cần dùng constructor này
     LinearDrone(const Problem& problem, const DroneConfig& config) : _problem(problem), _config(config) {}
 
+    // Copy assignment
+    LinearDrone& operator=(const LinearDrone& value) {
+        _current_node = value._current_node;
+        _current_time = value._current_time;
+        _current_load = value._current_load;
+        _energy_consumed = value._energy_consumed;
+        return *this;
+    }
+
     // Trả về thời điểm hiện tại của drone
     double time() const {return _current_time;}
 

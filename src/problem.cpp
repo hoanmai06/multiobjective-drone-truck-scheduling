@@ -209,11 +209,11 @@ bool Solution::is_valid() const {
         for (const Route& route : drone_routes) {
             Drone drone = problem.drone();
             for (int customer : route) {
-                if (!drone.can_go(customer)) return false;
+                if (!drone.can_serve(customer)) return false;
                 drone.serve(customer);
             }
 
-            if (!drone.can_go(0)) return false;
+            if (!drone.can_serve(0)) return false;
         }
     }
 
