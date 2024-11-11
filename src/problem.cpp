@@ -181,8 +181,8 @@ double LinearDrone::time_when_go_back_depot() {
 }
 
 bool LinearDrone::can_serve(int customer) const {
-    // Drone không được tới những khách mà drone không serve được
-    if (!_problem.can_drone_serve(customer)) return false;
+    // Drone không được tới những khách mà yêu cầu xe tải
+    if (_problem.does_customer_require_truck(customer)) return false;
 
     // Thử đi tới đó và kiểm tra xem drone còn valid không
     LinearDrone temp = *this;

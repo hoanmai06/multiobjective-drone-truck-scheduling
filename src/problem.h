@@ -242,8 +242,7 @@ public:
     const double& service_time_by_drone(int customer) const {return _service_time_by_drone[customer];}
 
     // Hàm trả về liệu drone có phục vụ được khách customer hay không
-    // TODO: Chưa hoàn tất
-    bool can_drone_serve(int customer) const {return !does_customer_require_truck(customer);}
+    bool can_drone_serve(int customer) const {return drone().can_serve(customer);}
 
     // Hàm trả về một bản truck/drone của bài toán
     Truck truck() const {return {*this, _truck_config};}
