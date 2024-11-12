@@ -3,19 +3,20 @@
 #include <numeric>
 #include <algorithm>
 
+bool operator==(const Individual& lhs, const Individual& rhs) {
+    return lhs.permutation_gene == rhs.permutation_gene && lhs.binary_gene == rhs.binary_gene;
+}
+
 // Hàm để giải mã từ Individual về Solution
 // Hàm hơi dài :(
-Solution decode(const Individual& individual) {
-    const Problem& problem = individual.problem;
-    Solution solution(individual.problem);
+Solution decode(const Individual& individual, const Problem& problem) {
+    Solution solution(problem);
 
     // Đếm số route trong individual bằng số số 1 trong binary cộng 1
-    int route_count = (int) std::count(individual.binary_gene.begin(), individual.binary_gene.end(), 1) + 1;
     int current_truck = 0;
     int index;
 
     // Điền các route vào trong truck
-
     // Khách hàng đầu tiên luôn cho vào route đầu
     solution.trucks[current_truck].push_back(individual.permutation_gene.front());
 
@@ -101,9 +102,7 @@ Solution decode(const Individual& individual) {
 }
 
 // Kiểm tra xem các drone route trong individual có hợp lệ không
-bool is_drone_routes_valid(const Individual& individual) {
-    const Problem& problem = individual.problem;
-
+bool is_drone_routes_valid(const Individual& individual, const Problem& problem) {
     // Tìm vị trí của khách drone đầu tiên
     int index, count = 0;
     for (index = 0; count < problem.truck_count(); ++index) {
@@ -127,7 +126,7 @@ bool is_drone_routes_valid(const Individual& individual) {
     return true;
 }
 
-bool is_valid(const Individual& individual) {
+bool is_valid(const Individual& individual, const Problem& problem) {
     // Phần hoán vị phải thật sự là hoán vị
     std::vector<bool> has_occurred(individual.permutation_gene.size());
     for (int i : individual.permutation_gene) {
@@ -136,11 +135,10 @@ bool is_valid(const Individual& individual) {
     }
 
     // Các drone route phải hợp lệ
-    return is_drone_routes_valid(individual);
+    return is_drone_routes_valid(individual, problem);
 }
 
-Fitness fitness(const Individual &individual) {
-    const Problem& problem = individual.problem;
+Fitness fitness(const Individual &individual, const Problem& problem) {
     std::vector<double> all_finish_times(problem.truck_count() + problem.drone_count());
     double total_wait_time = 0;
     int route_index = 0;

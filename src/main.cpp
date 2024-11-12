@@ -2,9 +2,6 @@
 
 #include "genetic.h"
 
-#include <iostream>
-#include <fstream>
-
 // Chỉnh loại drone tuyến tính hay phi tuyến trong drone_type.h
 
 int main() {
