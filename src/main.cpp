@@ -13,9 +13,9 @@ int main() {
     individual.permutation_gene = {1, 2, 3, 5, 4, 6};
     individual.binary_gene = {false, false, false, true, true};
 
-    Solution solution = decode(individual);
+    Solution solution = decode(individual, problem);
     solution.objectives();
-    fitness(individual);
+    fitness(individual, problem);
 
     return 0;
 }

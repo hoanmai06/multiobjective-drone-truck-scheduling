@@ -233,5 +233,9 @@ Fitness fitness(const Individual &individual, const Problem& problem) {
         drone_finish_times[drone_index] += trip_finish_times[trip_index];
     }
 
+    for (int i = 0; i < drone_finish_times.size(); ++i) {
+        all_finish_times[problem.truck_count() + i] = drone_finish_times[i];
+    }
+
     return {*std::max_element(all_finish_times.begin(), all_finish_times.end()), total_wait_time};
 }
