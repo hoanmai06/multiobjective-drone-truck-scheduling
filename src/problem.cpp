@@ -103,6 +103,7 @@ DroneConfig::DroneConfig(const std::string &config_path, const std::string &name
 
 void Truck::_go(int customer) {
     double distance = _problem.distance(_current_node, customer);
+    _current_node = customer;
 
     int hour = (int) (_current_time / 3600);
     double seconds_till_next_hour = 3600 * (hour + 1) - _current_time;
