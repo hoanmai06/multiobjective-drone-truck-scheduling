@@ -1,4 +1,5 @@
 #include "../src/problem.h"
+#include "../src/genetic.h"
 
 #include "gtest/gtest.h"
 
@@ -88,4 +89,37 @@ TEST(LINEAR_DRONE_TEST, LINEAR_DRONE_TEST) {
     EXPECT_NEAR(drone.time(), time, EPSILON);
     EXPECT_EQ(drone.load(), 0.18);
     EXPECT_NEAR(drone.energy_consumed(), energy_consumed, EPSILON);
+}
+
+TEST(OBJECTIVE_TEST, OBJECTIVE_TEST) {
+    TruckConfig truck_config("../config_parameter/truck_config.json");
+    DroneConfig drone_config("../config_parameter/drone_linear_config.json", "3");
+    Problem problem = Problem::from_file("../data/random_data/6.5.1.txt", truck_config, drone_config);
+
+    // Objective khi chỉ có 1 truck
+    Solution solution(problem);
+    solution.trucks[0] = {1, 2, 3, 5};
+
+    EXPECT_NEAR(solution.objectives().first, 2351.426595824311, EPSILON);
+    EXPECT_NEAR(solution.objectives().second, 5044.70819991153, EPSILON);
+
+    // Objective khi chỉ có 1 drone, 1 chuyến
+    solution.trucks[0] = {};
+    solution.drones[0] = {{4, 6}};
+    EXPECT_NEAR(problem.distance(6, 0), 2914.2983382522502, EPSILON);
+    EXPECT_NEAR(solution.objectives().first, 666.8703285302448, EPSILON);
+    EXPECT_NEAR(solution.objectives().second, 717.1643186647211, EPSILON);
+
+    // Objective khi có 1 drone, 2 chuyến
+    solution.trucks[0] = {};
+    solution.drones[0] = {{4}, {6}};
+    EXPECT_NEAR(problem.distance(4, 0), 1657.9864510121793, EPSILON);
+    EXPECT_NEAR(solution.objectives().first, 721.1469461683748, EPSILON);
+    EXPECT_NEAR(solution.objectives().second, 330.5734730841874, EPSILON);
+
+    // Objective khi 1 truck, 1 drone đi 2 chuyến
+    solution.trucks[0] = {1, 2, 3, 5};
+    solution.drones[0] = {{4}, {6}};
+    EXPECT_NEAR(solution.objectives().first, 2351.426595824311, EPSILON);
+    EXPECT_NEAR(solution.objectives().second, 5044.70819991153 + 330.5734730841874, EPSILON);
 }
