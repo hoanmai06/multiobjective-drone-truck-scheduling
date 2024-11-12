@@ -141,7 +141,19 @@ public:
     // Trả về thời điểm của drone nếu giờ nó đi về depot
     double time_when_go_back_depot();
 
-    // Trả về liệu drone có thể phục vụ khách này không (và vẫn có thể trở về depot)
+    // Trả về lượng hàng drone đang mang
+    double load() const {return _current_load;}
+
+    // Trả về trọng tải của drone
+    double capacity() const {return _config.capacity;}
+
+    // Trả về lượng năng lượng mà drone đã tiêu thụ
+    double energy_consumed() const {return _energy_consumed;}
+
+    // Trả về năng lượng tối đa của drone
+    double battery_capacity() const {return _config.battery_capacity;}
+
+    // Trả về liệu drone có thể phục vụ được khách này và vẫn còn năng lượng để trở về depot không
     bool can_serve(int customer) const;
 
     // Đưa drone đi phục vụ customer

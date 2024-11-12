@@ -24,7 +24,7 @@ add_executable(
         src/genetic.cpp
 )
 
-add_executable(truck_tests
+add_executable(general_test
         tests/tests.cpp
         src/genetic.cpp
         src/problem.cpp
@@ -32,8 +32,8 @@ add_executable(truck_tests
 
 target_link_libraries(tinh_toan_tien_hoa PRIVATE nlohmann_json::nlohmann_json)
 
-target_link_libraries(truck_tests GTest::gtest_main)
-target_link_libraries(truck_tests nlohmann_json::nlohmann_json)
+target_link_libraries(general_test GTest::gtest_main)
+target_link_libraries(general_test nlohmann_json::nlohmann_json)
 
 include(GoogleTest)
-gtest_discover_tests(truck_tests)
+gtest_discover_tests(general_test)

@@ -170,8 +170,6 @@ bool LinearDrone::_is_valid() const {
     // 2. Ràng buộc năng lượng
     if (_energy_consumed > _config.battery_capacity) return false;
 
-    // TODO: Hỏi cô về ràng buộc fix_distance, fix_time trong config và droneLimitationFightTime trong data
-
     return true;
 }
 
