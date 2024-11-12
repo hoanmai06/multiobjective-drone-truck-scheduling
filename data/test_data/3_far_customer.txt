@@ -1,0 +1,8 @@
+number_staff 1
+number_drone 1
+droneLimitationFightTime(s) 3600
+Customers 3
+Coordinate X		 Coordinate Y 		Demand		OnlyServicedByStaff		 ServiceTimeByTruck(s)		 ServiceTimeByDrone(s)
+50000	0	        0.05	1	60 	30
+50000	50000	    0.01	1	60 	30
+0	    50000	    0.01	1	60 	30
