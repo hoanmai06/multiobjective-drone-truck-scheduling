@@ -16,7 +16,13 @@ class Individual {
 public:
     PermutationGene permutation_gene;
     BinaryGene binary_gene;
-    Fitness fitness = {std::numeric_limits<int>::max(), std::numeric_limits<int>::max()};
+
+    Individual() = default;
+
+    void resize(int customer_count) {
+        permutation_gene.resize(customer_count);
+        binary_gene.resize(customer_count - 1);
+    }
 
     // Tạo ra một individual rỗng có permutation_gene dài bằng số khách hàng và binary_gene dài bằng số khách hàng trừ 1
     explicit Individual(const Problem& problem) {
@@ -25,11 +31,8 @@ public:
     }
 };
 
-bool operator==(const Individual& lhs, const Individual& rhs);
-
 using Population = std::vector<Individual>;
 using PopulationInitializationAlgorithm = std::function<Population(int population_size, const Problem&)>;
-using SelectionAlgorithm = std::function<const Individual&(const Population& population)>;
 using CrossoverAlgorithm = std::function<Individual(const Individual&, const Individual&)>;
 using MutationAlgorithm = std::function<Individual(const Individual&)>;
 

@@ -12,7 +12,6 @@ struct GeneticAlgorithmOptions {
     double mutation_rate = 0.1;
 
     PopulationInitializationAlgorithm initialization = nullptr;
-    SelectionAlgorithm selection = nullptr;
     CrossoverAlgorithm crossover = nullptr;
     MutationAlgorithm mutation = nullptr;
 };

@@ -3,10 +3,6 @@
 #include <numeric>
 #include <algorithm>
 
-bool operator==(const Individual& lhs, const Individual& rhs) {
-    return lhs.permutation_gene == rhs.permutation_gene && lhs.binary_gene == rhs.binary_gene;
-}
-
 // Hàm để giải mã từ Individual về Solution
 // Hàm hơi dài :(
 Solution decode(const Individual& individual, const Problem& problem) {
