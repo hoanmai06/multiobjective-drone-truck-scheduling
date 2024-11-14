@@ -194,6 +194,12 @@ private:
     // Cái này tôi cũng không nhớ tại sao tôi cho vào
     const int _node_count;
 
+    // Danh sách các khách yêu cầu xe tải
+    std::vector<int> _truck_only_customers;
+
+    // Mảng chứa liệu drone có thể phục vụ khách không
+    std::vector<bool> _can_drone_serve;
+
     // Problem lưu lại bản sao config của truck và drone
     TruckConfig _truck_config;
     DroneConfig _drone_config;
@@ -211,9 +217,10 @@ private:
             , _demands(new double[customer_count + 1])
             , _does_customer_require_truck(new bool[customer_count + 1])
             , _service_time_by_truck(new double[customer_count + 1])
-            , _service_time_by_drone(new double[customer_count + 1]) {}
+            , _service_time_by_drone(new double[customer_count + 1])
+            , _can_drone_serve(customer_count + 1) {}
 public:
-    // Destructor hủy các con trỏ được khai báo động, tránh dò bộ nhớ
+    // Destructor hủy các con trỏ được khai báo động, nếu không sẽ dò bộ nhớ
     ~Problem() {
         delete[] _distances;
         delete[] _demands;
@@ -236,6 +243,9 @@ public:
 
     // Trả về số nút trong bài toán (số khách hàng + 1)
     int node_count() const {return _node_count;}
+
+    const std::vector<int>& truck_only_customers() const {return _truck_only_customers;}
+    int truck_only_customer_count() const {return (int) _truck_only_customers.size();}
 
     // Các hàm tiếp theo có 2 bản, một bản trả về reference (có thể chỉnh sửa qua lời gọi hàm kiểu problem.distance(1, 2) = 10)
     // và một bản là const reference (chỉ đọc)
@@ -261,7 +271,7 @@ public:
     const double& service_time_by_drone(int customer) const {return _service_time_by_drone[customer];}
 
     // Hàm trả về liệu drone có phục vụ được khách customer hay không
-    bool can_drone_serve(int customer) const {return drone().can_serve(customer);}
+    bool can_drone_serve(int customer) const {return _can_drone_serve[customer];}
 
     // Hàm trả về một bản truck/drone của bài toán
     Truck truck() const {return {*this, _truck_config};}

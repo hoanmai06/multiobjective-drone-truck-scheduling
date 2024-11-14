@@ -5,12 +5,9 @@
 #include <algorithm>
 #include <random>
 
-std::random_device rd;
-//std::mt19937 random_engine(rd());
-
 // Khởi tạo random_engine với seed cố định để khi debug còn mô phỏng lại được lỗi
 // Khi chạy thuật toán lấy số liệu cần seed với std::random_device
-std::mt19937 random_engine(0);
+static std::mt19937 random_engine(0);
 
 class NSGA2Population {
 public:

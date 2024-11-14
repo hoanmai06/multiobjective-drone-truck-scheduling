@@ -40,7 +40,9 @@ Individual encode(const Solution& solution);
 Solution decode(const Individual& individual, const Problem& problem);
 
 bool is_drone_routes_valid(const Individual& individual, const Problem& problem);
-bool is_valid(const Individual& individual);
+bool is_valid(const Individual& individual, const Problem& problem);
 Fitness fitness(const Individual& individual, const Problem& problem);
+
+Individual create_random_individual(const Problem& problem);
 
 #endif //TINH_TOAN_TIEN_HOA_GENETIC_H

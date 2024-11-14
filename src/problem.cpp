@@ -43,6 +43,12 @@ Problem Problem::from_file(const std::string &data_path, const TruckConfig& truc
         }
     }
 
+    for (int customer = 1; customer <= customer_count; ++customer) {
+        Drone drone(problem, drone_config);
+        problem._can_drone_serve[customer] = drone.can_serve(customer);
+        if (!problem._can_drone_serve[customer]) problem._truck_only_customers.push_back(customer);
+    }
+
     return problem;
 }
 

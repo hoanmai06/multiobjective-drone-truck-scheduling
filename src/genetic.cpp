@@ -2,6 +2,9 @@
 
 #include <numeric>
 #include <algorithm>
+#include <random>
+
+static std::mt19937 random_engine(0);
 
 // Hàm để giải mã từ Individual về Solution
 // Hàm hơi dài :(
@@ -234,4 +237,59 @@ Fitness fitness(const Individual &individual, const Problem& problem) {
     }
 
     return {*std::max_element(all_finish_times.begin(), all_finish_times.end()), total_wait_time};
+}
+
+Individual create_random_individual(const Problem& problem) {
+    Individual individual(problem);
+
+    // Phần nhị phân
+    int pos = std::max(problem.truck_count() - 1, problem.truck_only_customer_count() - 1);
+    std::uniform_int_distribution<> first_one_position_distribution(pos, problem.customer_count() - 1 - problem.drone_count());
+    int first_one_index = first_one_position_distribution(random_engine);
+    individual.binary_gene[first_one_index] = true;
+
+    std::fill(
+            individual.binary_gene.begin(),
+            individual.binary_gene.begin() + problem.truck_count() - 1,
+            true);
+
+    std::shuffle(
+            individual.binary_gene.begin(),
+            individual.binary_gene.begin() + pos,
+            random_engine);
+
+    std::uniform_int_distribution<> drone_trip_count_distribution(problem.drone_count(), problem.customer_count() - first_one_index);
+    int drone_trip_count = drone_trip_count_distribution(random_engine);
+
+    std::fill(
+            individual.binary_gene.begin() + first_one_index + 1,
+            individual.binary_gene.begin() + first_one_index + 1 + drone_trip_count,
+            true);
+
+    std::shuffle(
+            individual.binary_gene.begin() + first_one_index + 1,
+            individual.binary_gene.end(),
+            random_engine);
+
+    // Phần hoán vị
+    // Điền các khách chỉ cho xe tải ở đầu
+    int index = 0;
+    for (int customer = 1; customer <= problem.customer_count(); ++customer) {
+        if (!problem.can_drone_serve(customer)) individual.permutation_gene[index++] = customer;
+    }
+    for (int customer = 1; customer <= problem.customer_count(); ++customer) {
+        if (problem.can_drone_serve(customer)) individual.permutation_gene[index++] = customer;
+    }
+
+    // Tráo phần cả xe tải và drone và phần xe tải
+    std::shuffle(
+            individual.permutation_gene.begin() + problem.truck_only_customer_count(),
+            individual.permutation_gene.end(),
+            random_engine);
+    std::shuffle(
+            individual.permutation_gene.begin(),
+            individual.permutation_gene.begin() + problem.truck_only_customer_count(),
+            random_engine);
+
+    return individual;
 }
