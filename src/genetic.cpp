@@ -118,8 +118,8 @@ bool is_drone_routes_valid(const Individual& individual, const Problem& problem)
         if (individual.binary_gene[i - 1] == 1) {
             drone = problem.drone();
         }
-        if (!drone.can_serve(individual.permutation_gene[index])) return false;
-        drone.serve(individual.permutation_gene[index]);
+        if (!drone.can_serve(individual.permutation_gene[i])) return false;
+        drone.serve(individual.permutation_gene[i]);
     }
 
     return true;
