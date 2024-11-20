@@ -58,6 +58,10 @@ Individual create_offspring(const NSGA2Population& population, const Problem& pr
         chance = distribution(random_engine);
         if (chance < options.mutation_rate) options.mutation(result);
 
+        if (!is_valid(result, problem)) {
+            result = options.repair(result, problem);
+        }
+
         return result;
     }
 }
@@ -120,6 +124,13 @@ NSGA2Population evolve_population(const NSGA2Population& population, const Probl
 
 Population nsga2(const Problem& problem, const GeneticAlgorithmOptions& options) {
     NSGA2Population population(options.initialization(options.population_size, problem), problem);
+
+    for (std::size_t i = 0; i < population.size(); ++i) {
+        if (!is_valid(population.individual_list[i], problem)) {
+            population.individual_list[i] = options.repair(population.individual_list[i], problem);
+        }
+    }
+
     log(population);
 
     for (int generation = 1; generation <= options.max_population_count; ++generation) {

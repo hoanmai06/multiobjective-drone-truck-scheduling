@@ -3,6 +3,8 @@
 
 #include "genetic.h"
 
+Individual repair(const Individual& individual, const Problem& problem);
+
 Individual create_random_individual(const Problem& problem);
 Population create_random_population(int population_size, const Problem& problem);
 

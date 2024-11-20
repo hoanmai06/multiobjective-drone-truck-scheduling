@@ -1,5 +1,6 @@
 #include "genetic_operator.h"
 
+#include "log.h"
 #include "problem.h"
 
 #include <vector>
@@ -8,6 +9,113 @@
 #include <random>
 
 std::mt19937 random_engine(0);
+
+Individual repair(const Individual& individual, const Problem& problem) {
+    // Khai báo mảng chứa các khách drone không đi được trong nghiệm hiện tại
+    std::vector<int> not_enough_energy;
+    std::vector<int> truck_only_in_drone;
+    not_enough_energy.reserve(problem.customer_count());
+    truck_only_in_drone.reserve(problem.customer_count());
+
+    // Khai báo mảng chứa các drone route sau khi tách các đơn không hợp lệ
+    std::vector<Route> valid_drone_routes;
+    valid_drone_routes.reserve(problem.customer_count());
+    valid_drone_routes.emplace_back();
+
+    // Tìm vị trí khách drone đầu tiên
+    int first_drone_customer_index, count = 0;
+    for (first_drone_customer_index = 0; count < problem.truck_count(); ++first_drone_customer_index) {
+        if (individual.binary_gene[first_drone_customer_index] == 1) ++count;
+    }
+
+    // Tạo drone và đi sẵn khách đầu tiên
+    Drone drone = problem.drone();
+    int current_customer = individual.permutation_gene[first_drone_customer_index];
+    if (!problem.can_drone_serve(current_customer)) {
+        truck_only_in_drone.push_back(current_customer);
+    } else {
+        if (!drone.can_serve(current_customer)) {
+            not_enough_energy.push_back(current_customer);
+        } else {
+            valid_drone_routes.back().push_back(current_customer);
+        }
+    }
+    drone.serve(current_customer);
+
+    // Duyệt qua các khách còn lại
+    for (int i = first_drone_customer_index + 1; i < individual.permutation_gene.size(); ++i) {
+        if (individual.binary_gene[i - 1] == 1) {
+            valid_drone_routes.emplace_back();
+            drone = problem.drone();
+        }
+
+        current_customer = individual.permutation_gene[i];
+        if (!problem.can_drone_serve(current_customer)) {
+            truck_only_in_drone.push_back(current_customer);
+        } else {
+            if (!drone.can_serve(current_customer)) {
+                not_enough_energy.push_back(current_customer);
+            } else {
+                valid_drone_routes.back().push_back(current_customer);
+            }
+        }
+
+        drone.serve(current_customer);
+    }
+
+//    print(not_enough_energy);
+//    print(truck_only_in_drone);
+//    print(valid_drone_routes);
+
+    // Tạo individual mới hợp lệ
+    Individual new_individual(problem);
+    int new_individual_end = 0;
+
+    // Chép phần xe tải từ individual cũ qua
+    for (int i = 0; i < first_drone_customer_index; ++i) {
+        new_individual.permutation_gene[i] = individual.permutation_gene[i];
+        new_individual.binary_gene[i] = individual.binary_gene[i];
+        ++new_individual_end;
+    }
+
+    // Thêm các khách chỉ cho xe tải mà hiện ở phần drone vào cuối xe tải
+    new_individual.binary_gene[new_individual_end - 1] = false;
+
+    for (int customer : truck_only_in_drone) {
+        new_individual.permutation_gene[new_individual_end] = customer;
+        new_individual.binary_gene[new_individual_end] = false;
+        ++new_individual_end;
+    }
+
+    new_individual.binary_gene[new_individual_end - 1] = true;
+
+    // Thêm phần drone đã bỏ khách thiếu năng lượng đi
+    for (const Route& route : valid_drone_routes) {
+        for (int customer : route) {
+            new_individual.permutation_gene[new_individual_end] = customer;
+            new_individual.binary_gene[new_individual_end] = false;
+            ++new_individual_end;
+        }
+        new_individual.binary_gene[new_individual_end - 1] = true;
+    }
+
+    // Dồn các khách không đủ năng lượng vào các route mới
+    drone = problem.drone();
+    for (int customer : not_enough_energy) {
+        if (drone.can_serve(customer)) {
+            drone.serve(customer);
+            new_individual.permutation_gene[new_individual_end] = customer;
+        } else {
+            drone = problem.drone();
+            new_individual.permutation_gene[new_individual_end] = customer;
+            new_individual.binary_gene[new_individual_end - 1] = true;
+        }
+
+        ++new_individual_end;
+    }
+
+    return new_individual;
+}
 
 Individual create_random_individual(const Problem &problem) {
     Individual individual(problem);
@@ -19,13 +127,11 @@ Individual create_random_individual(const Problem &problem) {
     int first_one_index = first_one_position_distribution(random_engine);
     individual.binary_gene[first_one_index] = true;
 
-    std::fill(
-            individual.binary_gene.begin(),
+    std::fill(individual.binary_gene.begin(),
             individual.binary_gene.begin() + problem.truck_count() - 1,
             true);
 
-    std::shuffle(
-            individual.binary_gene.begin(),
+    std::shuffle(individual.binary_gene.begin(),
             individual.binary_gene.begin() + pos,
             random_engine);
 
@@ -33,13 +139,11 @@ Individual create_random_individual(const Problem &problem) {
                                                                   problem.customer_count() - first_one_index);
     int drone_trip_count = drone_trip_count_distribution(random_engine);
 
-    std::fill(
-            individual.binary_gene.begin() + first_one_index + 1,
+    std::fill(individual.binary_gene.begin() + first_one_index + 1,
             individual.binary_gene.begin() + first_one_index + 1 + drone_trip_count,
             true);
 
-    std::shuffle(
-            individual.binary_gene.begin() + first_one_index + 1,
+    std::shuffle(individual.binary_gene.begin() + first_one_index + 1,
             individual.binary_gene.end(),
             random_engine);
 

@@ -16,6 +16,7 @@ struct GeneticAlgorithmOptions {
     PopulationInitializationAlgorithm initialization = nullptr;
     CrossoverAlgorithm crossover = nullptr;
     MutationAlgorithm mutation = nullptr;
+    RepairAlgorithm repair = nullptr;
 };
 
 class NSGA2Population {
