@@ -1,6 +1,6 @@
 #include "problem.h"
 
-#include "print.h"
+#include "log.h"
 #include "genetic_operator.h"
 #include "nsga2.h"
 
@@ -9,7 +9,7 @@
 int main() {
     TruckConfig truck_config("../config_parameter/truck_config.json");
     DroneConfig drone_config("../config_parameter/drone_linear_config.json", "3");
-    Problem problem = Problem::from_file("../data/random_data/6.5.1.txt", truck_config, drone_config);
+    Problem problem = Problem::from_file("../data/random_data/50.10.1.txt", truck_config, drone_config);
 
     GeneticAlgorithmOptions options;
     options.population_size = 100;

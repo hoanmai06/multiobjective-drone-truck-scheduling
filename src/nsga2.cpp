@@ -1,7 +1,5 @@
 #include "nsga2.h"
-#include "print.h"
-
-#include <pagmo/pagmo.hpp>
+#include "log.h"
 
 #include <algorithm>
 #include <random>
@@ -10,56 +8,11 @@
 // Khi chạy thuật toán lấy số liệu cần seed với std::random_device
 static std::mt19937 random_engine(0);
 
-class NSGA2Population {
-public:
-    Population individual_list;
-    std::vector<Fitness> fitness_list;
-    std::vector<int> ranks;
-
-    [[nodiscard]] std::size_t size() const {
-        return individual_list.size();
-    }
-
-    void reserve(std::size_t n) {
-        individual_list.reserve(n);
-        fitness_list.reserve(n);
-        ranks.reserve(n);
-    }
-
-    void resize(std::size_t n) {
-        individual_list.resize(n);
-        fitness_list.resize(n);
-        ranks.resize(n);
-    }
-
-    void recalculate_rank() {
-        auto pagmo_result = pagmo::fast_non_dominated_sorting(fitness_list);
-        std::vector<std::vector<std::size_t>> fronts_indices = std::get<0>(pagmo_result);
-        for (int front = 0; front < fronts_indices.size(); ++front) {
-            for (int index = 0; index < fronts_indices[front].size(); ++index) {
-                ranks[index] = front;
-            }
-        }
-    }
-
-    NSGA2Population() = default;
-
-    explicit NSGA2Population(Population&& pop, const Problem& problem) : individual_list(pop) {
-        fitness_list.reserve(individual_list.size());
-        ranks.resize(individual_list.size());
-
-        for (const Individual& individual : individual_list) {
-            fitness_list.push_back(std::move(fitness(individual, problem)));
-        }
-
-        recalculate_rank();
-    }
-};
-
 // Hàm trả về non-dominated front của một quần thể
 Population non_dominated_front(const NSGA2Population& population) {
     // Gọi hàm của pagmo
     std::vector<std::size_t> pareto_indices = pagmo::non_dominated_front_2d(population.fitness_list);
+
 
     // Tạo quần thể từ kết quả của pagmo
     Population result;
@@ -167,9 +120,11 @@ NSGA2Population evolve_population(const NSGA2Population& population, const Probl
 
 Population nsga2(const Problem& problem, const GeneticAlgorithmOptions& options) {
     NSGA2Population population(options.initialization(options.population_size, problem), problem);
+    log(population);
 
     for (int generation = 1; generation <= options.max_population_count; ++generation) {
-        evolve_population(population, problem, options);
+        population = evolve_population(population, problem, options);
+        log(population);
         std::cout << generation << '\n';
     }
 

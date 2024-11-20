@@ -28,6 +28,7 @@ add_executable(
         src/genetic.cpp
         src/nsga2.cpp
         src/genetic_operator.cpp
+        src/log.cpp
 )
 
 add_executable(general_test
