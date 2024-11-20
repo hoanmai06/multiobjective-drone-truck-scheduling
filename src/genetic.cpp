@@ -104,7 +104,7 @@ Solution decode(const Individual& individual, const Problem& problem) {
 bool is_drone_routes_valid(const Individual& individual, const Problem& problem) {
     // Tìm vị trí của khách drone đầu tiên
     int index, count = 0;
-    for (index = 0; count < problem.truck_count(); ++index) {
+    for (index = 0; count < problem.truck_count() && index < problem.customer_count(); ++index) {
         if (individual.binary_gene[index] == 1) ++count;
     }
 
