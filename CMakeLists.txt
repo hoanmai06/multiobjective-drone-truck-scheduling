@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.29)
 project(tinh_toan_tien_hoa)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 include(FetchContent)
 
@@ -27,6 +27,7 @@ add_executable(
         src/problem.cpp
         src/genetic.cpp
         src/nsga2.cpp
+        src/genetic_operator.cpp
 )
 
 add_executable(general_test

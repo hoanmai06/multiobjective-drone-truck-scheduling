@@ -1,4 +1,5 @@
 #include "nsga2.h"
+#include "print.h"
 
 #include <pagmo/pagmo.hpp>
 
@@ -11,22 +12,22 @@ static std::mt19937 random_engine(0);
 
 class NSGA2Population {
 public:
-    Population data;
+    Population individual_list;
     std::vector<Fitness> fitness_list;
     std::vector<int> ranks;
 
     [[nodiscard]] std::size_t size() const {
-        return data.size();
+        return individual_list.size();
     }
 
     void reserve(std::size_t n) {
-        data.reserve(n);
+        individual_list.reserve(n);
         fitness_list.reserve(n);
         ranks.reserve(n);
     }
 
     void resize(std::size_t n) {
-        data.resize(n);
+        individual_list.resize(n);
         fitness_list.resize(n);
         ranks.resize(n);
     }
@@ -43,11 +44,11 @@ public:
 
     NSGA2Population() = default;
 
-    explicit NSGA2Population(Population&& pop, const Problem& problem) : data(pop) {
-        fitness_list.reserve(data.size());
-        ranks.resize(data.size());
+    explicit NSGA2Population(Population&& pop, const Problem& problem) : individual_list(pop) {
+        fitness_list.reserve(individual_list.size());
+        ranks.resize(individual_list.size());
 
-        for (const Individual& individual : data) {
+        for (const Individual& individual : individual_list) {
             fitness_list.push_back(std::move(fitness(individual, problem)));
         }
 
@@ -64,7 +65,7 @@ Population non_dominated_front(const NSGA2Population& population) {
     Population result;
     result.reserve(pareto_indices.size());
     for (std::size_t index : pareto_indices) {
-        result.push_back(population.data[index]);
+        result.push_back(population.individual_list[index]);
     }
 
     return result;
@@ -77,7 +78,7 @@ const Individual& tournament_selection(const NSGA2Population& population) {
     std::size_t second = distribution(random_engine);
     while (first == second) second = distribution(random_engine);
 
-    return population.ranks[first] < population.ranks[second] ? population.data[first] : population.data[second];
+    return population.ranks[first] < population.ranks[second] ? population.individual_list[first] : population.individual_list[second];
 }
 
 Individual create_offspring(const NSGA2Population& population, const Problem& problem, const GeneticAlgorithmOptions& options) {
@@ -94,53 +95,60 @@ Individual create_offspring(const NSGA2Population& population, const Problem& pr
         chance = distribution(random_engine);
         if (chance > options.crossover_rate) continue;
 
-        Individual result = options.crossover(first, second);
+        // Chọn ngẫu nhiên một trong 2 con của crossover
+        bool get_first_child = std::uniform_int_distribution(0, 1)(random_engine);
+        Individual result = get_first_child
+                            ? options.crossover(first, second).first
+                            : options.crossover(first, second).second;
 
         // Nếu quay số vào ô đột biến thì đột biến
         chance = distribution(random_engine);
-        if (chance < options.mutation_rate) result = options.mutation(result);
+        if (chance < options.mutation_rate) options.mutation(result);
 
         return result;
     }
 }
 
-NSGA2Population evolve_population(NSGA2Population population, const Problem& problem, const GeneticAlgorithmOptions& options) {
-    population.data.reserve(2*population.data.size());
+NSGA2Population evolve_population(const NSGA2Population& population, const Problem& problem, const GeneticAlgorithmOptions& options) {
+    NSGA2Population new_population = population;
+    new_population.individual_list.reserve(2 * new_population.individual_list.size());
 
     // Sinh con và thêm vào quần thể để tạo quần thể P+Q có độ lớn gấp đôi
-    for (int i = 0; i < population.data.size(); ++i) {
-        population.data.push_back(std::move(create_offspring(population, problem, options)));
-        population.fitness_list.push_back(fitness(population.data.back(), problem));
+    for (int i = 0; i < options.population_size; ++i) {
+        new_population.individual_list.push_back(std::move(create_offspring(population, problem, options)));
+        new_population.fitness_list.push_back(fitness(new_population.individual_list.back(), problem));
     }
 
-    // Chia front
-    // Tạo vector fitness và vào hàm của pagmo
-    pagmo::fnds_return_type pagmo_result = pagmo::fast_non_dominated_sorting(population.fitness_list);
+    // Chia front bằng cách gọi hàm của pagmo
+    pagmo::fnds_return_type pagmo_result = pagmo::fast_non_dominated_sorting(new_population.fitness_list);
     std::vector<std::vector<std::size_t>> fronts_indices = std::get<0>(pagmo_result);
 
-    // Tạo population và đổ đầy population này
+    // Tạo population chứa thế hệ tiếp theo
     NSGA2Population result;
     result.reserve(options.population_size);
 
     for (std::vector<std::size_t>& front : fronts_indices) {
+        if (result.size() == options.population_size) break;
         // Nếu front này là front cuối được lấy vào thì phải lấy theo crowding distance
         if (result.size() + front.size() > options.population_size) {
             // Tính crowding distance bằng pagmo
             std::vector<Fitness> front_fitness;
             front_fitness.reserve(front.size());
-            for (std::size_t index : front) front_fitness.push_back(population.fitness_list[index]);
+            for (std::size_t index : front) front_fitness.push_back(new_population.fitness_list[index]);
             std::vector<double> crowding_distances = pagmo::crowding_distance(front_fitness);
 
-            // Sắp xếp toàn bộ front theo thứ tự giảm dần crowding distance (dùng heap có thể lấy k phần tử lớn nhất
-            // trong O(klogn) nhưng tạm thời xếp toàn bộ cho dễ)
-            std::sort(front.begin(), front.end(), [&crowding_distances](int lhs, int rhs) {
-               return crowding_distances[lhs] > crowding_distances[rhs];
+            // Sinh ra một mảng index với giá trị crowding distance tại index giảm dần
+            std::vector<std::size_t> indices(front.size());
+            std::iota(indices.begin(), indices.end(), 0);
+            std::sort(indices.begin(), indices.end(), [&crowding_distances](int lhs, int rhs) {
+                return crowding_distances[lhs] > crowding_distances[rhs];
             });
 
             std::size_t missing_individual_count = options.population_size - result.size();
             for (int index = 0; index < missing_individual_count; ++index) {
-                result.data.push_back(std::move(population.data[index]));
-                result.fitness_list.push_back(std::move(population.fitness_list[index]));
+                std::size_t individual_index = front[indices[index]];
+                result.individual_list.push_back(std::move(new_population.individual_list[individual_index]));
+                result.fitness_list.push_back(std::move(new_population.fitness_list[individual_index]));
             }
 
             break;
@@ -148,8 +156,8 @@ NSGA2Population evolve_population(NSGA2Population population, const Problem& pro
 
         // Nếu không thì lấy toàn bộ front
         for (std::size_t index : front) {
-            result.data.push_back(std::move(population.data[index]));
-            result.fitness_list.push_back(std::move(population.fitness_list[index]));
+            result.individual_list.push_back(std::move(new_population.individual_list[index]));
+            result.fitness_list.push_back(std::move(new_population.fitness_list[index]));
         }
     }
 
@@ -162,6 +170,7 @@ Population nsga2(const Problem& problem, const GeneticAlgorithmOptions& options)
 
     for (int generation = 1; generation <= options.max_population_count; ++generation) {
         evolve_population(population, problem, options);
+        std::cout << generation << '\n';
     }
 
     return non_dominated_front(population);

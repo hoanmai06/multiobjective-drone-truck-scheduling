@@ -1,6 +1,8 @@
 #include "problem.h"
 
-#include "genetic.h"
+#include "print.h"
+#include "genetic_operator.h"
+#include "nsga2.h"
 
 // Chỉnh loại drone tuyến tính hay phi tuyến trong drone_type.h
 
@@ -9,13 +11,17 @@ int main() {
     DroneConfig drone_config("../config_parameter/drone_linear_config.json", "3");
     Problem problem = Problem::from_file("../data/random_data/6.5.1.txt", truck_config, drone_config);
 
-    Individual individual(problem);
-    individual.permutation_gene = {1, 2, 3, 5, 4, 6};
-    individual.binary_gene = {false, false, false, true, true};
+    GeneticAlgorithmOptions options;
+    options.population_size = 100;
+    options.max_population_count = 500;
+    options.crossover_rate = 0.95;
+    options.mutation_rate = 0.1;
 
-    Solution solution = decode(individual, problem);
-    solution.objectives();
-    fitness(individual, problem);
+    options.initialization = create_random_population;
+    options.crossover = crossover;
+    options.mutation = mutation;
+
+    Population solutions = nsga2(problem, options);
 
     return 0;
 }
