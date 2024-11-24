@@ -3,6 +3,8 @@ project(tinh_toan_tien_hoa)
 
 set(CMAKE_CXX_STANDARD 17)
 
+#add_compile_options("-O3")
+
 include(FetchContent)
 
 FetchContent_Declare(
@@ -29,6 +31,7 @@ add_executable(
         src/nsga2.cpp
         src/genetic_operator.cpp
         src/log.cpp
+        src/local_search.cpp
 )
 
 add_executable(general_test

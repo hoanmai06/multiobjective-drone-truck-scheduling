@@ -71,6 +71,8 @@ Individual create_offspring(const NSGA2Population& population, const Problem& pr
         }
         if (is_duplicated) continue;
 
+        options.postprocessing(result, problem);
+
         return result;
     }
 }
@@ -138,6 +140,9 @@ Population nsga2(const Problem& problem, const GeneticAlgorithmOptions& options)
         if (!is_valid(population.individual_list[i], problem)) {
             population.individual_list[i] = options.repair(population.individual_list[i], problem);
         }
+
+        options.postprocessing(population.individual_list[i], problem);
+        population.fitness_list[i] = fitness(population.individual_list[i], problem);
     }
 
     log(population);

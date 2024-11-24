@@ -2,6 +2,7 @@
 
 #include "log.h"
 #include "genetic_operator.h"
+#include "local_search.h"
 #include "nsga2.h"
 
 // Chỉnh loại drone tuyến tính hay phi tuyến trong drone_type.h
@@ -21,6 +22,7 @@ int main() {
     options.crossover = crossover;
     options.mutation = mutation;
     options.repair = repair;
+    options.postprocessing = first_improvement_permutation_swap_hill_climbing;
 
     Population solutions = nsga2(problem, options);
 

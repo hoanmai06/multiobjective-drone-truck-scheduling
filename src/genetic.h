@@ -41,6 +41,7 @@ using PopulationInitializationAlgorithm = std::function<Population(int populatio
 using CrossoverAlgorithm = std::function<std::pair<Individual, Individual>(const Individual&, const Individual&)>;
 using MutationAlgorithm = std::function<void(Individual&)>;
 using RepairAlgorithm = std::function<Individual(Individual&, const Problem&)>;
+using IndividualPostprocessingAlgorithm = std::function<void(Individual&, const Problem&)>;
 
 Individual encode(const Solution& solution);
 Solution decode(const Individual& individual, const Problem& problem);
