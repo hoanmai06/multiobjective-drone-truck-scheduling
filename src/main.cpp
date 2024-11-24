@@ -24,14 +24,5 @@ int main() {
 
     Population solutions = nsga2(problem, options);
 
-    print(solutions.size());
-
-    for (const Individual& individual : solutions) {
-        print(individual.binary_gene);
-        print(individual.permutation_gene);
-
-        print(decode(individual, problem).is_valid());
-    }
-
     return 0;
 }

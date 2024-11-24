@@ -11,4 +11,5 @@ void log(const NSGA2Population& population) {
     }
 
     log_file << "P\n";
+    log_file.flush();
 }

@@ -62,6 +62,15 @@ Individual create_offspring(const NSGA2Population& population, const Problem& pr
             result = options.repair(result, problem);
         }
 
+        bool is_duplicated = false;
+        for (const Individual& individual : population.individual_list) {
+            if (individual.permutation_gene == result.permutation_gene && individual.binary_gene == result.binary_gene) {
+                is_duplicated = true;
+                break;
+            }
+        }
+        if (is_duplicated) continue;
+
         return result;
     }
 }
@@ -136,7 +145,10 @@ Population nsga2(const Problem& problem, const GeneticAlgorithmOptions& options)
     for (int generation = 1; generation <= options.max_population_count; ++generation) {
         population = evolve_population(population, problem, options);
         log(population);
-        std::cout << generation << '\n';
+        std::cout << "Generation " << generation << '\n';
+        for (const Fitness& fitness : population.fitness_list) {
+            std::cout << fitness << '\n';
+        }
     }
 
     return non_dominated_front(population);

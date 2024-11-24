@@ -267,6 +267,7 @@ std::pair<Individual, Individual> crossover(const Individual &parent1,
     std::uniform_int_distribution<> dis(0, n - 1);
     int cut1 = dis(random_engine);
     int cut2 = dis(random_engine);
+    while (cut2 == cut1) cut2 = dis(random_engine);
     if (cut1 > cut2) {
         std::swap(cut1, cut2);
     }
