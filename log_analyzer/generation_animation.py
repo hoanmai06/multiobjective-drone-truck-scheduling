@@ -28,7 +28,7 @@ def update(frame):
 log = Log('../log/log.txt')
 
 fig, ax = plt.subplots()
-scatter = ax.scatter(*zip(*list_of_all_fitness()))
+scatter = ax.scatter(*zip(*list_of_all_fitness()), s=15, c='black')
 text = ax.set_xlabel('Generation 0')
 
 animation = matplotlib.animation.FuncAnimation(fig, func=update, frames=len(log.generations), interval=50, repeat=False)
