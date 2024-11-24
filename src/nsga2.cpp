@@ -13,7 +13,6 @@ Population non_dominated_front(const NSGA2Population& population) {
     // Gọi hàm của pagmo
     std::vector<std::size_t> pareto_indices = pagmo::non_dominated_front_2d(population.fitness_list);
 
-
     // Tạo quần thể từ kết quả của pagmo
     Population result;
     result.reserve(pareto_indices.size());
