@@ -13,6 +13,7 @@ void first_improvement_permutation_swap_hill_climbing(Individual& individual, co
         if (individual.binary_gene[first_drone_customer] == 1) ++count;
     }
 
+    BEGIN:
     for (int i = 0; i < individual.permutation_gene.size(); ++i) {
         bool does_customer_require_truck = problem.does_customer_require_truck(individual.permutation_gene[i]);
         for (int j = i + 1; j < individual.permutation_gene.size(); ++j) {
@@ -27,7 +28,7 @@ void first_improvement_permutation_swap_hill_climbing(Individual& individual, co
                 current_fitness = std::move(clone_fitness);
                 std::swap(individual.permutation_gene[i], individual.permutation_gene[j]);
 
-//                print(current_fitness);
+                goto BEGIN;
             }
         }
     }
