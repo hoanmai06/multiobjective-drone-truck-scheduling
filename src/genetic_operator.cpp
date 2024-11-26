@@ -107,6 +107,7 @@ Individual repair(const Individual& individual, const Problem& problem) {
             new_individual.permutation_gene[new_individual_end] = customer;
         } else {
             drone = problem.drone();
+            drone.serve(customer);
             new_individual.permutation_gene[new_individual_end] = customer;
             new_individual.binary_gene[new_individual_end - 1] = true;
         }
