@@ -276,7 +276,7 @@ std::pair<double, double> drone_objectives(const std::vector<Route>& routes, con
     return {finish_time, total_waiting_time};
 }
 
-std::pair<double, double> Solution::objectives() const {
+std::vector<double> Solution::objectives() const {
     double latest_finish_time = 0;
     double total_waiting_time = 0;
 

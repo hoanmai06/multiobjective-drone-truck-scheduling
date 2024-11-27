@@ -308,7 +308,7 @@ public:
     bool is_valid() const;
 
     // Hàm tính mục tiêu của nghiệm
-    std::pair<double, double> objectives() const;
+    std::vector<double> objectives() const;
 };
 
 #endif //TINH_TOAN_TIEN_HOA_PROBLEM_H
