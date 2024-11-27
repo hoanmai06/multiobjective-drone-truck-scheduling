@@ -66,6 +66,12 @@ Fitness IndividualInformation::fitness_after_swap(int i, int j) {
     double wait_time_i = _trip_wait_times[trip_i];
     double wait_time_j = _trip_wait_times[trip_j];
 
+    double route_finish_i;
+    double route_finish_j;
+
+    if (i < _first_drone_customer_index) route_finish_i = _route_finish_times[trip_i];
+    if (j < _first_drone_customer_index) route_finish_j = _route_finish_times[trip_j];
+
     // Tính lại thời điểm kết thúc và thời gian chờ chỉ ở những trip bị tráo
 
     // Nếu i ở trip truck
@@ -143,7 +149,15 @@ Fitness IndividualInformation::fitness_after_swap(int i, int j) {
     }
 
     // Sinh ra kết quả
-    double finish_time = latest_finish_time(_trip_finish_times, _problem);
+
+    if (i < _first_drone_customer_index) _route_finish_times[trip_i] = _trip_finish_times[trip_i];
+    if (j < _first_drone_customer_index) _route_finish_times[trip_j] = _trip_finish_times[trip_j];
+
+    // Tối ưu: Nếu cả i và j đều ở trip truck thì finish_time là max của _trip_finish_times luôn
+    double finish_time = (i < _first_drone_customer_index && j < _first_drone_customer_index)
+            ? *std::max_element(_route_finish_times.begin(), _route_finish_times.end())
+            : latest_finish_time(_trip_finish_times, _problem);
+
     double total_wait_time = std::accumulate(_trip_wait_times.begin(), _trip_wait_times.end(), 0.0);
 
     // Trả lại giá trị thời điểm kết thúc và thời gian chờ của các trip về ban đầu
@@ -151,6 +165,9 @@ Fitness IndividualInformation::fitness_after_swap(int i, int j) {
     _trip_finish_times[trip_j] = finish_time_j;
     _trip_wait_times[trip_i] = wait_time_i;
     _trip_wait_times[trip_j] = wait_time_j;
+
+    if (i < _first_drone_customer_index) _route_finish_times[trip_i] = route_finish_i;
+    if (j < _first_drone_customer_index) _route_finish_times[trip_j] = route_finish_j;
 
     return {finish_time, total_wait_time};
 }

@@ -13,6 +13,7 @@ private:
     std::vector<int> _index_of_first_customer_of_trip;
     std::vector<double> _trip_finish_times;
     std::vector<double> _trip_wait_times;
+    std::vector<double> _route_finish_times;
 
 public:
     explicit IndividualInformation(const Individual& individual, const Problem& problem) : _individual(individual), _problem(problem) {
@@ -24,6 +25,7 @@ public:
 
         _trip_finish_times = trip_finish_times(individual, problem);
         _trip_wait_times = trip_wait_times(individual, problem);
+        _route_finish_times = route_finish_times(_trip_finish_times, problem);
 
         // Tính mảng các khách đầu trong trip
         _index_of_first_customer_of_trip.resize(_trip_finish_times.size() + 1);

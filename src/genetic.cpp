@@ -274,6 +274,34 @@ std::vector<double> trip_wait_times(const Individual& individual, const Problem&
     return trip_wait_times;
 }
 
+std::vector<double> route_finish_times(const std::vector<double>& trip_finish_times, const Problem& problem) {
+    std::vector<double> route_finish_times(problem.truck_count() + problem.drone_count());
+
+    for (int i = 0; i < problem.truck_count() && i < trip_finish_times.size(); ++i) {
+        route_finish_times[i] = trip_finish_times[i];
+    }
+
+    // Nếu như có trip cho drone
+    if (trip_finish_times.size() > problem.truck_count()) {
+        std::vector<int> sorted_drone_trip_indices(trip_finish_times.size() - problem.truck_count());
+        std::iota(sorted_drone_trip_indices.begin(), sorted_drone_trip_indices.end(), problem.truck_count());
+        std::sort(sorted_drone_trip_indices.begin(), sorted_drone_trip_indices.end(), [&trip_finish_times](int lhs, int rhs) {
+            return trip_finish_times[lhs] > trip_finish_times[rhs];
+        });
+
+        // Duyệt qua tất cả các trip theo thứ tự giảm dần về finish_time
+        for (int trip_index : sorted_drone_trip_indices) {
+            // Chọn drone hiện có finish_times bé nhất
+            int drone_index = (int) (std::min_element(route_finish_times.begin() + problem.truck_count(), route_finish_times.end()) - route_finish_times.begin());
+
+            // Thêm trip hiện tại vào drone đó
+            route_finish_times[drone_index] += trip_finish_times[trip_index];
+        }
+    }
+
+    return route_finish_times;
+}
+
 double latest_finish_time(const std::vector<double>& trip_finish_times, const Problem& problem) {
     // Tính thời gian hoàn thành của các drone theo Longest Processing Time First
     std::vector<double> drone_finish_times(problem.drone_count());
