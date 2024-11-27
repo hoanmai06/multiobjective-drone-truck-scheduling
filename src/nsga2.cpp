@@ -149,10 +149,10 @@ Population nsga2(const Problem& problem, const GeneticAlgorithmOptions& options)
     for (int generation = 1; generation <= options.max_population_count; ++generation) {
         population = evolve_population(population, problem, options);
         log(population);
-        std::cout << "Generation " << generation << '\n';
         for (const Fitness& fitness : population.fitness_list) {
             std::cout << fitness << '\n';
         }
+        std::cout << "Generation " << generation << '\n';
     }
 
     return non_dominated_front(population);

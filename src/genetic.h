@@ -48,6 +48,11 @@ Solution decode(const Individual& individual, const Problem& problem);
 
 bool is_drone_routes_valid(const Individual& individual, const Problem& problem);
 bool is_valid(const Individual& individual, const Problem& problem);
+
+std::vector<double> trip_finish_times(const Individual& individual, const Problem& problem);
+std::vector<double> trip_wait_times(const Individual& individual, const Problem& problem);
+
+double latest_finish_time(const std::vector<double>& trip_finish_times, const Problem& problem);
 Fitness fitness(const Individual& individual, const Problem& problem);
 
 #endif //TINH_TOAN_TIEN_HOA_GENETIC_H

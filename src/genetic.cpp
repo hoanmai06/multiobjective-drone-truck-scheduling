@@ -137,6 +137,170 @@ bool is_valid(const Individual& individual, const Problem& problem) {
     return is_drone_routes_valid(individual, problem);
 }
 
+std::vector<double> trip_finish_times(const Individual& individual, const Problem& problem) {
+    std::vector<double> trip_finish_times;
+    trip_finish_times.reserve(problem.node_count());
+
+    int customer_index = 0;
+
+    // Tính thời gian hoàn thành các trip của truck
+    // Khởi tạo truck và cho truck đi đơn đầu
+    Truck truck = problem.truck();
+    truck.serve(individual.permutation_gene[customer_index]);
+
+    // Duyệt qua các khách còn lại
+    for (++customer_index; customer_index < individual.permutation_gene.size(); ++customer_index) {
+        // Nếu khách này nằm trong route mới
+        if (individual.binary_gene[customer_index - 1] == 1) {
+            // Lưu lại thời gian về route cũ
+            trip_finish_times.push_back(truck.time_when_go_back_depot());
+            // Nếu đã hết route thì khách này là của drone nên break
+            if (trip_finish_times.size() >= problem.truck_count()) break;
+            // Nếu không thì khởi tạo lại truck
+            truck = problem.truck();
+        }
+
+        truck.serve(individual.permutation_gene[customer_index]);
+    }
+
+    // Nếu dừng do đã duyệt tới khách cuối thì chỉ có khách của truck
+    if (customer_index == individual.permutation_gene.size()) {
+        trip_finish_times.push_back(truck.time_when_go_back_depot());
+        return trip_finish_times;
+    }
+
+    // Tính thời điểm hoàn thành các trip của drone
+    // Khởi tạo drone và cho drone đi giao khách đầu tiên
+    Drone drone = problem.drone();
+    drone.serve(individual.permutation_gene[customer_index]);
+
+    // Duyệt qua các khách còn lại của drone
+    for (++customer_index; customer_index < individual.permutation_gene.size(); ++customer_index) {
+        // Nếu trước đó là số 1 thì ngắt route, lưu thời gian và reset drone
+        if (individual.binary_gene[customer_index - 1] == 1) {
+            trip_finish_times.push_back(drone.time_when_go_back_depot());
+            drone = problem.drone();
+        }
+
+        drone.serve(individual.permutation_gene[customer_index]);
+    }
+    // Đơn cuối vẫn chưa lưu vào mảng nên lưu thủ công đơn cuối (hiện thì đơn chỉ lưu khi binary trước đó là số 1)
+    trip_finish_times.emplace_back(drone.time_when_go_back_depot());
+
+    return trip_finish_times;
+}
+
+std::vector<double> trip_wait_times(const Individual& individual, const Problem& problem) {
+    std::vector<double> trip_wait_times;
+    trip_wait_times.reserve(problem.node_count());
+
+    int customer_index = 0;
+
+    // Tính thời gian hoàn thành các trip của truck
+    // Khởi tạo truck và cho truck đi đơn đầu
+    trip_wait_times.emplace_back();
+    int customer_count_in_route = 0;
+    double previous_time = 0;
+
+    Truck truck = problem.truck();
+    truck.serve(individual.permutation_gene[customer_index]);
+    ++customer_count_in_route;
+    previous_time = truck.time();
+
+    // Duyệt qua các khách còn lại
+    for (++customer_index; customer_index < individual.permutation_gene.size(); ++customer_index) {
+        // Nếu khách này nằm trong route mới
+        if (individual.binary_gene[customer_index - 1] == 1) {
+            // Thời gian đi về depot được chờ bởi tất cả khách
+            trip_wait_times.back() += customer_count_in_route * (truck.time_when_go_back_depot() - truck.time());
+
+            if (trip_wait_times.size() >= problem.truck_count()) break;
+
+            // Thêm route mới
+            trip_wait_times.emplace_back();
+            customer_count_in_route = 0;
+            previous_time = 0;
+
+            truck = problem.truck();
+        }
+
+        truck.serve(individual.permutation_gene[customer_index]);
+        // Thời gian xe đi này được chờ bởi số khách trước đó trong xe
+        trip_wait_times.back() += customer_count_in_route * (truck.time() - previous_time);
+        previous_time = truck.time();
+        ++customer_count_in_route;
+    }
+
+    // Nếu dừng do đã duyệt tới khách cuối thì chỉ có khách của truck
+    if (customer_index == individual.permutation_gene.size()) {
+        return trip_wait_times;
+    }
+
+    // Tính thời điểm hoàn thành các trip của drone
+    // Khởi tạo drone và cho drone đi giao khách đầu tiên
+    trip_wait_times.emplace_back();
+    customer_count_in_route = 0;
+    previous_time = 0;
+
+    Drone drone = problem.drone();
+    drone.serve(individual.permutation_gene[customer_index]);
+    ++customer_count_in_route;
+    previous_time = drone.time();
+
+    // Duyệt qua các khách còn lại của drone
+    for (++customer_index; customer_index < individual.permutation_gene.size(); ++customer_index) {
+        // Nếu trước đó là số 1 thì ngắt route, lưu thời gian và reset drone
+        if (individual.binary_gene[customer_index - 1] == 1) {
+            // Thời gian đi về depot được chờ bởi tất cả khách
+            trip_wait_times.back() += customer_count_in_route * (drone.time_when_go_back_depot() - drone.time());
+
+            // Thêm route mới
+            trip_wait_times.emplace_back();
+            customer_count_in_route = 0;
+            previous_time = 0;
+
+            drone = problem.drone();
+        }
+
+        drone.serve(individual.permutation_gene[customer_index]);
+        // Thời gian drone đi này được chờ bởi số khách trước đó trong xe
+        trip_wait_times.back() += customer_count_in_route * (drone.time() - previous_time);
+        previous_time = drone.time();
+        ++customer_count_in_route;
+    }
+
+    trip_wait_times.back() += customer_count_in_route * (drone.time_when_go_back_depot() - drone.time());
+
+    return trip_wait_times;
+}
+
+double latest_finish_time(const std::vector<double>& trip_finish_times, const Problem& problem) {
+    // Tính thời gian hoàn thành của các drone theo Longest Processing Time First
+    std::vector<double> drone_finish_times(problem.drone_count());
+
+    // Nếu như có trip cho drone
+    if (trip_finish_times.size() > problem.truck_count()) {
+        std::vector<int> sorted_drone_trip_indices(trip_finish_times.size() - problem.truck_count());
+        std::iota(sorted_drone_trip_indices.begin(), sorted_drone_trip_indices.end(), problem.truck_count());
+        std::sort(sorted_drone_trip_indices.begin(), sorted_drone_trip_indices.end(), [&trip_finish_times](int lhs, int rhs) {
+            return trip_finish_times[lhs] > trip_finish_times[rhs];
+        });
+
+        // Duyệt qua tất cả các trip theo thứ tự giảm dần về finish_time
+        for (int trip_index : sorted_drone_trip_indices) {
+            // Chọn drone hiện có finish_times bé nhất
+            int drone_index = (int) (std::min_element(drone_finish_times.begin(), drone_finish_times.end()) - drone_finish_times.begin());
+
+            // Thêm trip hiện tại vào drone đó
+            drone_finish_times[drone_index] += trip_finish_times[trip_index];
+        }
+    }
+
+    // Trả về result là thời gian hoàn thành muộn nhất của phần truck và phần drone
+    return std::max(*std::max_element(trip_finish_times.begin(), trip_finish_times.begin() + problem.truck_count()),
+                    *std::max_element(drone_finish_times.begin(), drone_finish_times.end()));
+}
+
 Fitness fitness(const Individual &individual, const Problem& problem) {
     std::vector<double> all_finish_times(problem.truck_count() + problem.drone_count());
     double total_wait_time = 0;
