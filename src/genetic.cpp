@@ -186,7 +186,7 @@ Fitness fitness(const Individual &individual, const Problem& problem) {
     Drone drone = problem.drone();
     drone.serve(individual.permutation_gene[index_in_gene]);
     customer_count_in_route = 1;
-    previous_time = 0;
+    previous_time = drone.time();
 
     // Duyệt qua các khách của drone
     for (int i = index_in_gene + 1; i < individual.permutation_gene.size(); ++i) {
