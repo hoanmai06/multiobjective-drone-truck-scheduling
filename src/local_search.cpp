@@ -3,10 +3,6 @@
 
 #include <chrono>
 
-bool is_better(const Fitness& lhs, const Fitness& rhs) {
-    return (lhs[0] < rhs[0] && lhs[1] <= rhs[1]) || (lhs[0] <= rhs[0] && lhs[1] < rhs[1]);
-}
-
 bool IndividualInformation::can_swap(int i, int j) {
     // 0. Nếu cả 2 khách hàng là của truck thì luôn tráo được
     if (i < _first_drone_customer_index && j < _first_drone_customer_index) {

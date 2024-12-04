@@ -35,15 +35,7 @@ const Individual& tournament_selection(const NSGA2Population& population) {
     return population.ranks[first] < population.ranks[second] ? population.individual_list[first] : population.individual_list[second];
 }
 
-bool operator==(const Individual& lhs, const Individual& rhs) {
-    return lhs.binary_gene == rhs.binary_gene && lhs.permutation_gene == rhs.permutation_gene;
-}
-
-bool operator!=(const Individual& lhs, const Individual& rhs) {
-    return !(lhs == rhs);
-}
-
-Individual create_offspring(const NSGA2Population& population, const Problem& problem, const GeneticAlgorithmOptions& options) {
+Individual create_offspring(const NSGA2Population& population, const Problem& problem, const NSGA2Options& options) {
     std::uniform_real_distribution<double> distribution(0, 1);
     double chance;
 
@@ -92,7 +84,7 @@ bool is_fitness_in_list(const Fitness& fitness, const std::vector<Fitness>& fitn
     return false;
 }
 
-NSGA2Population evolve_population(const NSGA2Population& population, const Problem& problem, const GeneticAlgorithmOptions& options) {
+NSGA2Population evolve_population(const NSGA2Population& population, const Problem& problem, const NSGA2Options& options) {
     NSGA2Population new_population;
     new_population.individual_list.reserve(2 * new_population.individual_list.size());
 
@@ -164,7 +156,7 @@ NSGA2Population evolve_population(const NSGA2Population& population, const Probl
     return result;
 }
 
-Population nsga2(const Problem& problem, const GeneticAlgorithmOptions& options) {
+Population nsga2(const Problem& problem, const NSGA2Options& options) {
     NSGA2Population population(options.initialization(options.population_size, problem), problem);
 
     for (std::size_t i = 0; i < population.size(); ++i) {

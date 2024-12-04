@@ -6,7 +6,7 @@
 
 #include <pagmo/pagmo.hpp>
 
-struct GeneticAlgorithmOptions {
+struct NSGA2Options {
     int population_size = 100;
     int max_population_count = 500;
 
@@ -74,6 +74,6 @@ public:
     }
 };
 
-Population nsga2(const Problem& problem, const GeneticAlgorithmOptions& options);
+Population nsga2(const Problem& problem, const NSGA2Options& options);
 
 #endif //TINH_TOAN_TIEN_HOA_NSGA2_H

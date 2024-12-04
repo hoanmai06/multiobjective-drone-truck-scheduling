@@ -2,6 +2,7 @@
 #define TINH_TOAN_TIEN_HOA_LOG_H
 
 #include "nsga2.h"
+#include "moead.h"
 
 #include <iostream>
 
@@ -45,5 +46,6 @@ void print(
 }
 
 void log(const NSGA2Population& population);
+void log(const MOEADPopulation& population);
 
 #endif //TINH_TOAN_TIEN_HOA_LOG_H

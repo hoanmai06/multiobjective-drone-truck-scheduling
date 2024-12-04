@@ -13,3 +13,13 @@ void log(const NSGA2Population& population) {
     log_file << "P\n";
     log_file.flush();
 }
+
+void log(const MOEADPopulation& population) {
+    for (const Fitness& fitness : population.external_population_fitness) {
+        log_file << fitness << '\n';
+        log_file << "I\n";
+    }
+
+    log_file << "P\n";
+    log_file.flush();
+}

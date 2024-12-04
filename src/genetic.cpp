@@ -6,6 +6,10 @@
 
 static std::mt19937 random_engine(0);
 
+bool is_better(const Fitness& lhs, const Fitness& rhs) {
+    return (lhs[0] < rhs[0] && lhs[1] <= rhs[1]) || (lhs[0] <= rhs[0] && lhs[1] < rhs[1]);
+}
+
 // Hàm để giải mã từ Individual về Solution
 // Hàm hơi dài :(
 Solution decode(const Individual& individual, const Problem& problem) {

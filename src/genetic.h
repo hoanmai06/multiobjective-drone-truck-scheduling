@@ -34,6 +34,14 @@ public:
         permutation_gene.resize(problem.customer_count());
         binary_gene.resize(problem.customer_count() - 1);
     }
+
+    bool operator==(const Individual& rhs) const {
+        return binary_gene == rhs.binary_gene && permutation_gene == rhs.permutation_gene;
+    }
+
+    bool operator!=(const Individual& rhs) const {
+        return !(*this == rhs);
+    }
 };
 
 using Population = std::vector<Individual>;
@@ -45,6 +53,8 @@ using IndividualPostprocessingAlgorithm = std::function<void(Individual&, const 
 
 Individual encode(const Solution& solution);
 Solution decode(const Individual& individual, const Problem& problem);
+
+bool is_better(const Fitness& lhs, const Fitness& rhs);
 
 bool is_drone_routes_valid(const Individual& individual, const Problem& problem);
 bool is_valid(const Individual& individual, const Problem& problem);
