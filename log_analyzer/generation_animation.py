@@ -25,11 +25,13 @@ def update(frame):
 
     return scatter, text
 
-log = Log('../log/log.txt')
+if __name__ == '__main__':
+    log = Log('../log/log.txt')
 
-fig, ax = plt.subplots()
-scatter = ax.scatter(*zip(*list_of_all_fitness()), s=15, c='black')
-text = ax.set_xlabel('Generation 0')
+    fig, ax = plt.subplots()
+    scatter = ax.scatter(*zip(*list_of_all_fitness()), s=15, c='black')
+    text = ax.set_xlabel('Generation 0')
 
-animation = matplotlib.animation.FuncAnimation(fig, func=update, frames=len(log.generations), interval=50, repeat=False)
-plt.show()
+    animation = matplotlib.animation.FuncAnimation(fig, func=update, frames=len(log.generations), interval=60, repeat=False)
+    # animation.save('200.10.1_1400_2000.mp4')
+    plt.show()
