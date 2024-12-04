@@ -23,9 +23,10 @@ class Log:
                 for individual_texts in generation_texts.split('I\n')[:-1]:
                     individual = Individual()
 
-                    binary_gene_text, permutation_gene_text, fitness_text = individual_texts.split('\n')[:-1]
-                    individual.binary_gene = list(map(lambda x: False if x == '0' else True, binary_gene_text[1:-1].split(',')))
-                    individual.permutation_gene = list(map(int, permutation_gene_text[1:-1].split(',')))
+                    # binary_gene_text, permutation_gene_text, fitness_text = individual_texts.split('\n')[:-1]
+                    fitness_text = individual_texts.split('\n')[0]
+                    # individual.binary_gene = list(map(lambda x: False if x == '0' else True, binary_gene_text[1:-1].split(',')))
+                    # individual.permutation_gene = list(map(int, permutation_gene_text[1:-1].split(',')))
                     individual.fitness = tuple(map(float, fitness_text[1:-1].split(',')))
 
                     generation.append(individual)
@@ -34,3 +35,4 @@ class Log:
 
 if __name__ == '__main__':
     log = Log('../log/log.txt')
+    print('Hello World!')
