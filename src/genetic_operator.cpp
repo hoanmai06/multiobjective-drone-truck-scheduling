@@ -286,6 +286,7 @@ std::pair<Individual, Individual> crossover(const Individual &parent1,
 
     // Single Point Crossover for binary gene
     int cut = dis(random_engine);
+    std::uniform_int_distribution<> binary_distribution(0, n - 2);
     for (int i = 0; i < cut; ++i) {
         child1.binary_gene[i] = parent1.binary_gene[i];
         child2.binary_gene[i] = parent2.binary_gene[i];
@@ -303,6 +304,7 @@ std::pair<Individual, Individual> crossover(const Individual &parent1,
 }
 
 void mutation(Individual &individual) {
+    // Đột biến phần hoán vị
     int n = (int) individual.permutation_gene.size();
     std::uniform_int_distribution<> distribution(0, n - 1);
     int idx1 = distribution(random_engine);
@@ -314,4 +316,9 @@ void mutation(Individual &individual) {
     int tmp = individual.permutation_gene[idx1];
     individual.permutation_gene[idx1] = individual.permutation_gene[idx2];
     individual.permutation_gene[idx2] = tmp;
+
+    // Đột biến phần nhị phân
+    std::uniform_int_distribution<> binary_distribution(0, n - 2);
+    int pos = binary_distribution(random_engine);
+    individual.binary_gene[pos] = !individual.binary_gene[pos];
 }
