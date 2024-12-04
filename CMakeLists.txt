@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.21)
 project(tinh_toan_tien_hoa)
 
 set(CMAKE_CXX_STANDARD 17)
 
-#add_compile_options(-O3 -flto)
+add_compile_options(-O3 -flto)
 
 include(FetchContent)
 
@@ -23,9 +23,19 @@ FetchContent_MakeAvailable(googletest)
 FetchContent_MakeAvailable(json)
 find_package(Pagmo REQUIRED)
 
+# add_executable(
+#         tinh_toan_tien_hoa
+#         src/main.cpp
+#         src/problem.cpp
+#         src/genetic.cpp
+#         src/nsga2.cpp
+#         src/genetic_operator.cpp
+#         src/log.cpp
+#         src/local_search.cpp
+# )
 add_executable(
-        tinh_toan_tien_hoa
-        src/main.cpp
+        ttth_moead
+        src/main_moead.cpp
         src/problem.cpp
         src/genetic.cpp
         src/nsga2.cpp
@@ -34,18 +44,21 @@ add_executable(
         src/local_search.cpp
 )
 
-add_executable(general_test
-        tests/tests.cpp
-        src/genetic.cpp
-        src/problem.cpp
-)
+# add_executable(general_test
+#         tests/tests.cpp
+#         src/genetic.cpp
+#         src/problem.cpp
+# )
 
-target_link_libraries(tinh_toan_tien_hoa nlohmann_json::nlohmann_json)
-target_link_libraries(tinh_toan_tien_hoa Pagmo::pagmo)
+# target_link_libraries(tinh_toan_tien_hoa nlohmann_json::nlohmann_json)
+# target_link_libraries(tinh_toan_tien_hoa Pagmo::pagmo)
 
-target_link_libraries(general_test GTest::gtest_main)
-target_link_libraries(general_test nlohmann_json::nlohmann_json)
-target_link_libraries(general_test Pagmo::pagmo)
+target_link_libraries(ttth_moead nlohmann_json::nlohmann_json)
+target_link_libraries(ttth_moead Pagmo::pagmo)
 
-include(GoogleTest)
-gtest_discover_tests(general_test)
+# target_link_libraries(general_test GTest::gtest_main)
+# target_link_libraries(general_test nlohmann_json::nlohmann_json)
+# target_link_libraries(general_test Pagmo::pagmo)
+
+# include(GoogleTest)
+# gtest_discover_tests(general_test)
