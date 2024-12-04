@@ -18,6 +18,11 @@ int main() {
     options.crossover_rate = 0.95;
     options.mutation_rate = 0.1;
 
+    options.max_same_parent_crossover_retry_count = 10;
+    options.max_create_offspring_retry_count = 10;
+
+    options.force_mutation_on_bad_crossover = true;
+
     options.initialization = create_random_population;
     options.crossover = crossover;
     options.mutation = mutation;

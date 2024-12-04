@@ -13,6 +13,11 @@ struct GeneticAlgorithmOptions {
     double crossover_rate = 0.95;
     double mutation_rate = 0.1;
 
+    int max_same_parent_crossover_retry_count = 10;
+    int max_create_offspring_retry_count = 10;
+
+    bool force_mutation_on_bad_crossover = true;
+
     PopulationInitializationAlgorithm initialization = nullptr;
     CrossoverAlgorithm crossover = nullptr;
     MutationAlgorithm mutation = nullptr;

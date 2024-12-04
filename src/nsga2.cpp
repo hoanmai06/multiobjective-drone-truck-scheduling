@@ -8,6 +8,8 @@
 // Khi chạy thuật toán lấy số liệu cần seed với std::random_device
 static std::mt19937 random_engine(0);
 
+const double EPSILON = 0.0000001;
+
 // Hàm trả về non-dominated front của một quần thể
 Population non_dominated_front(const NSGA2Population& population) {
     // Gọi hàm của pagmo
@@ -33,6 +35,14 @@ const Individual& tournament_selection(const NSGA2Population& population) {
     return population.ranks[first] < population.ranks[second] ? population.individual_list[first] : population.individual_list[second];
 }
 
+bool operator==(const Individual& lhs, const Individual& rhs) {
+    return lhs.binary_gene == rhs.binary_gene && lhs.permutation_gene == rhs.permutation_gene;
+}
+
+bool operator!=(const Individual& lhs, const Individual& rhs) {
+    return !(lhs == rhs);
+}
+
 Individual create_offspring(const NSGA2Population& population, const Problem& problem, const GeneticAlgorithmOptions& options) {
     std::uniform_real_distribution<double> distribution(0, 1);
     double chance;
@@ -53,27 +63,35 @@ Individual create_offspring(const NSGA2Population& population, const Problem& pr
                             ? options.crossover(first, second).first
                             : options.crossover(first, second).second;
 
-        // Nếu quay số vào ô đột biến thì đột biến
+        // Nếu con sinh ra giống bố mẹ thì cố sinh lại
+        for (int i = 0; i < options.max_same_parent_crossover_retry_count; ++i) {
+            if (result != first && result != second) break;
+
+            result = get_first_child
+                     ? options.crossover(first, second).first
+                     : options.crossover(first, second).second;
+        }
+
+        // Nếu quay số vào ô đột biến hoặc nếu phải đột biến trên con tệ và con đang tệ thì đột biến
         chance = distribution(random_engine);
+        if (options.force_mutation_on_bad_crossover && (result == first || result == second)) chance = 0;
         if (chance < options.mutation_rate) options.mutation(result);
 
         if (!is_valid(result, problem)) {
             result = options.repair(result, problem);
         }
 
-        bool is_duplicated = false;
-        for (const Individual& individual : population.individual_list) {
-            if (individual.permutation_gene == result.permutation_gene && individual.binary_gene == result.binary_gene) {
-                is_duplicated = true;
-                break;
-            }
-        }
-        if (is_duplicated) continue;
-
         options.postprocessing(result, problem);
 
         return result;
     }
+}
+
+bool is_fitness_in_list(const Fitness& fitness, const std::vector<Fitness>& fitness_list) {
+    for (const Fitness& fitness_in_list : fitness_list) {
+        if (std::fabs(fitness[0] - fitness_in_list[0]) < EPSILON && std::fabs(fitness[1] - fitness_in_list[1]) < EPSILON) return true;
+    }
+    return false;
 }
 
 NSGA2Population evolve_population(const NSGA2Population& population, const Problem& problem, const GeneticAlgorithmOptions& options) {
@@ -82,8 +100,17 @@ NSGA2Population evolve_population(const NSGA2Population& population, const Probl
 
     // Sinh con và thêm vào quần thể để tạo quần thể P+Q có độ lớn gấp đôi
     for (int i = 0; i < options.population_size; ++i) {
-        new_population.individual_list.push_back(std::move(create_offspring(population, problem, options)));
-        new_population.fitness_list.push_back(fitness(new_population.individual_list.back(), problem));
+        Individual offspring = create_offspring(population, problem, options);
+        Fitness offspring_fitness = fitness(offspring, problem);
+
+        for (int attempt = 0; attempt < options.max_create_offspring_retry_count; ++attempt) {
+            if (!is_fitness_in_list(offspring_fitness, new_population.fitness_list)) break;
+            offspring = create_offspring(population, problem, options);
+            offspring_fitness = fitness(offspring, problem);
+        }
+
+        new_population.individual_list.push_back(std::move(offspring));
+        new_population.fitness_list.push_back(std::move(offspring_fitness));
     }
 
     // Chia front bằng cách gọi hàm của pagmo
