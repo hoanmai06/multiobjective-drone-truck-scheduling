@@ -14,7 +14,7 @@ int main() {
 
     GeneticAlgorithmOptions options;
     options.population_size = 100;
-    options.max_population_count = 500;
+    options.max_population_count = 1000;
     options.crossover_rate = 0.95;
     options.mutation_rate = 0.1;
 
@@ -23,11 +23,14 @@ int main() {
 
     options.force_mutation_on_bad_crossover = true;
 
+    options.local_search_period = 10;
+
     options.initialization = create_random_population;
     options.crossover = crossover;
     options.mutation = mutation;
     options.repair = repair;
-    options.postprocessing = first_improvement_permutation_swap_hill_climbing;
+    options.postprocessing = [] (Individual&, const Problem&) {};
+    options.local_search = first_improvement_permutation_swap_hill_climbing;
 
     Population solutions = nsga2(problem, options);
 

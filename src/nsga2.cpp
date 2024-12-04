@@ -81,8 +81,6 @@ Individual create_offspring(const NSGA2Population& population, const Problem& pr
             result = options.repair(result, problem);
         }
 
-        options.postprocessing(result, problem);
-
         return result;
     }
 }
@@ -95,11 +93,18 @@ bool is_fitness_in_list(const Fitness& fitness, const std::vector<Fitness>& fitn
 }
 
 NSGA2Population evolve_population(const NSGA2Population& population, const Problem& problem, const GeneticAlgorithmOptions& options) {
-    NSGA2Population new_population = population;
+    NSGA2Population new_population;
     new_population.individual_list.reserve(2 * new_population.individual_list.size());
 
+    for (int i = 0; i < population.size(); ++i) {
+        if (!is_fitness_in_list(population.fitness_list[i], new_population.fitness_list)) {
+            new_population.individual_list.push_back(population.individual_list[i]);
+            new_population.fitness_list.push_back(population.fitness_list[i]);
+        }
+    }
+
     // Sinh con và thêm vào quần thể để tạo quần thể P+Q có độ lớn gấp đôi
-    for (int i = 0; i < options.population_size; ++i) {
+    while (new_population.size() < 2 * options.population_size) {
         Individual offspring = create_offspring(population, problem, options);
         Fitness offspring_fitness = fitness(offspring, problem);
 
@@ -167,7 +172,6 @@ Population nsga2(const Problem& problem, const GeneticAlgorithmOptions& options)
             population.individual_list[i] = options.repair(population.individual_list[i], problem);
         }
 
-        options.postprocessing(population.individual_list[i], problem);
         population.fitness_list[i] = fitness(population.individual_list[i], problem);
     }
 
@@ -175,6 +179,13 @@ Population nsga2(const Problem& problem, const GeneticAlgorithmOptions& options)
 
     for (int generation = 1; generation <= options.max_population_count; ++generation) {
         population = evolve_population(population, problem, options);
+        if ((options.local_search_period != 0 && generation % options.local_search_period == 0) || generation == options.max_population_count) {
+            for (int i = 0; i < population.size(); ++i) {
+                options.local_search(population.individual_list[i], problem);
+                population.fitness_list[i] = fitness(population.individual_list[i], problem);
+            }
+        }
+
         log(population);
         for (const Fitness& fitness : population.fitness_list) {
             std::cout << fitness << '\n';

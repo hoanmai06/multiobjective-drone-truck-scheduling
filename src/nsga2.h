@@ -18,11 +18,14 @@ struct GeneticAlgorithmOptions {
 
     bool force_mutation_on_bad_crossover = true;
 
+    int local_search_period = 10;
+
     PopulationInitializationAlgorithm initialization = nullptr;
     CrossoverAlgorithm crossover = nullptr;
     MutationAlgorithm mutation = nullptr;
     RepairAlgorithm repair = nullptr;
-    IndividualPostprocessingAlgorithm postprocessing = nullptr;
+    IndividualPostprocessingAlgorithm postprocessing = [] (Individual&, const Problem&) {};
+    IndividualPostprocessingAlgorithm local_search = [] (Individual&, const Problem&) {};
 };
 
 class NSGA2Population {
