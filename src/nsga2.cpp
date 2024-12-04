@@ -179,9 +179,17 @@ Population nsga2(const Problem& problem, const GeneticAlgorithmOptions& options)
 
     for (int generation = 1; generation <= options.max_population_count; ++generation) {
         population = evolve_population(population, problem, options);
-        if ((options.local_search_period != 0 && generation % options.local_search_period == 0) || generation == options.max_population_count) {
+
+        if (options.local_search_period != 0 && generation % options.local_search_period == 0) {
             for (int i = 0; i < population.size(); ++i) {
                 options.local_search(population.individual_list[i], problem);
+                population.fitness_list[i] = fitness(population.individual_list[i], problem);
+            }
+        }
+
+        if (generation == options.max_population_count) {
+            for (int i = 0; i < population.size(); ++i) {
+                options.postprocessing(population.individual_list[i], problem);
                 population.fitness_list[i] = fitness(population.individual_list[i], problem);
             }
         }
