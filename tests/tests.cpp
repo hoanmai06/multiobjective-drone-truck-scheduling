@@ -100,26 +100,26 @@ TEST(OBJECTIVE_TEST, OBJECTIVE_TEST) {
     Solution solution(problem);
     solution.trucks[0] = {1, 2, 3, 5};
 
-    EXPECT_NEAR(solution.objectives().first, 2351.426595824311, EPSILON);
-    EXPECT_NEAR(solution.objectives().second, 5044.70819991153, EPSILON);
+    EXPECT_NEAR(solution.objectives()[0], 2351.426595824311, EPSILON);
+    EXPECT_NEAR(solution.objectives()[1], 5044.70819991153, EPSILON);
 
     // Objective khi chỉ có 1 drone, 1 chuyến
     solution.trucks[0] = {};
     solution.drones[0] = {{4, 6}};
     EXPECT_NEAR(problem.distance(6, 0), 2914.2983382522502, EPSILON);
-    EXPECT_NEAR(solution.objectives().first, 666.8703285302448, EPSILON);
-    EXPECT_NEAR(solution.objectives().second, 717.1643186647211, EPSILON);
+    EXPECT_NEAR(solution.objectives()[0], 666.8703285302448, EPSILON);
+    EXPECT_NEAR(solution.objectives()[1], 717.1643186647211, EPSILON);
 
     // Objective khi có 1 drone, 2 chuyến
     solution.trucks[0] = {};
     solution.drones[0] = {{4}, {6}};
     EXPECT_NEAR(problem.distance(4, 0), 1657.9864510121793, EPSILON);
-    EXPECT_NEAR(solution.objectives().first, 721.1469461683748, EPSILON);
-    EXPECT_NEAR(solution.objectives().second, 330.5734730841874, EPSILON);
+    EXPECT_NEAR(solution.objectives()[0], 721.1469461683748, EPSILON);
+    EXPECT_NEAR(solution.objectives()[1], 330.5734730841874, EPSILON);
 
     // Objective khi 1 truck, 1 drone đi 2 chuyến
     solution.trucks[0] = {1, 2, 3, 5};
     solution.drones[0] = {{4}, {6}};
-    EXPECT_NEAR(solution.objectives().first, 2351.426595824311, EPSILON);
-    EXPECT_NEAR(solution.objectives().second, 5044.70819991153 + 330.5734730841874, EPSILON);
+    EXPECT_NEAR(solution.objectives()[0], 2351.426595824311, EPSILON);
+    EXPECT_NEAR(solution.objectives()[1], 5044.70819991153 + 330.5734730841874, EPSILON);
 }
