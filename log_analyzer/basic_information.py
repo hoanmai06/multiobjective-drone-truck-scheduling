@@ -2,7 +2,7 @@ from pygmo.core import non_dominated_front_2d
 
 from log_reader import Log
 
-log = Log('../log/50.10.1_150_500_LS.txt')
+log = Log('../log/log.txt')
 
 # In kích thước front
 fitness_list = [individual.fitness for individual in log.generations[-1]]
