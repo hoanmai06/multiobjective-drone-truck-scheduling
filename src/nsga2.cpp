@@ -2,11 +2,7 @@
 #include "log.h"
 
 #include <algorithm>
-#include <random>
-
-// Khởi tạo random_engine với seed cố định để khi debug còn mô phỏng lại được lỗi
-// Khi chạy thuật toán lấy số liệu cần seed với std::random_device
-static std::mt19937 random_engine(0);
+#include "random.h"
 
 const double EPSILON = 0.0000001;
 

@@ -6,9 +6,7 @@
 #include <vector>
 #include <utility>
 #include <unordered_map>
-#include <random>
-
-static std::mt19937 random_engine(0);
+#include "random.h"
 
 Individual repair(const Individual& individual, const Problem& problem) {
     // Khai báo mảng chứa các khách drone không đi được trong nghiệm hiện tại

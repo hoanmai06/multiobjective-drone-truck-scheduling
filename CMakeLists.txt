@@ -32,6 +32,8 @@ add_executable(
         src/genetic_operator.cpp
         src/log.cpp
         src/local_search.cpp
+        src/moead.cpp
+        src/random.cpp
 )
 
 add_executable(general_test

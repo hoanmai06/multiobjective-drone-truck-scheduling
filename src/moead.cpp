@@ -1,9 +1,7 @@
 #include "moead.h"
 #include "log.h"
 
-#include <random>
-
-static std::mt19937 random_engine(0);
+#include "random.h"
 
 double tchebycheff(const Fitness& fitness, const std::vector<double>& reference_point, const std::vector<double>& weight) {
     return std::max(weight[0]*std::abs(fitness[0] - reference_point[0]), weight[1]*std::abs(fitness[1] - reference_point[1]));
