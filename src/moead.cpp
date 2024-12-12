@@ -22,9 +22,9 @@ std::vector<std::vector<double>> uniform_weights(std::size_t population_size) {
     return weights;
 }
 
-Individual create_offspring(std::size_t i, MOEADPopulation& population, const Problem& problem, const MOEADOptions& options) {
+Individual create_offspring(const std::vector<std::size_t>& neighbors, MOEADPopulation& population, const Problem& problem, const MOEADOptions& options) {
     // Chọn ngẫu nhiên 2 cá thể trong tập hàng xóm và sinh con
-    std::uniform_int_distribution<std::size_t> distribution(0, options.neighbor_count - 1);
+    std::uniform_int_distribution<std::size_t> distribution(0, neighbors.size() - 1);
     std::uniform_real_distribution<> chance_distribution(0, 1);
     double chance;
 
@@ -32,8 +32,8 @@ Individual create_offspring(std::size_t i, MOEADPopulation& population, const Pr
     std::size_t second = distribution(random_engine);
     while (first == second) second = distribution(random_engine);
 
-    first = population.neighbor_indices[i][first];
-    second = population.neighbor_indices[i][second];
+    first = neighbors[first];
+    second = neighbors[second];
 
     // Lai ghép
     bool get_first_child = std::uniform_int_distribution(0, 1)(random_engine);
@@ -54,23 +54,43 @@ Individual create_offspring(std::size_t i, MOEADPopulation& population, const Pr
 }
 
 void evolve_population(MOEADPopulation& population, const Problem& problem, const MOEADOptions& options) {
+    std::uniform_real_distribution<> distribution(0, 1);
+    double chance;
+
     // Duyệt qua toàn bộ cá thể trong quần thể
     for (std::size_t i = 0; i < population.size(); ++i) {
+        // Chuẩn bị tập hàng xóm
+        chance = distribution(random_engine);
+        std::vector<std::size_t> neighbors;
+
+        if (chance < options.select_parent_from_whole_population_probability) {
+            neighbors.resize(population.size());
+            std::iota(neighbors.begin(), neighbors.end(), 0);
+        } else {
+            neighbors = population.neighbor_indices[i];
+        }
+
         // 1. Sinh con ứng với cá thể hiện tại
-        Individual offspring = create_offspring(i, population, problem, options);
+        Individual offspring = create_offspring(neighbors, population, problem, options);
         Fitness offspring_fitness = fitness(offspring, problem);
 
         // 2. Cập nhật z
         if (offspring_fitness[0] < population.reference_point[0]) population.reference_point[0] = offspring_fitness[0];
         if (offspring_fitness[1] < population.reference_point[1]) population.reference_point[1] = offspring_fitness[1];
 
-        // 3. Cập nhật hàng xóm: Nếu nghiệm này tốt hơn hàng xóm cho bài toán của hàng xóm thì đổi hàng xóm
-        for (std::size_t index : population.neighbor_indices[i]) {
+        // 3. Cập nhật hàng xóm: Nếu nghiệm này tốt hơn hàng xóm cho bài toán của hàng xóm thì thay thế hàng xóm
+        std::shuffle(neighbors.begin(), neighbors.end(), random_engine);
+        int replaced_solution_count = 0;
+        for (std::size_t index : neighbors) {
+            if (replaced_solution_count >= options.maximum_number_of_replaced_solution_each_child) break;
+
             double fitness1 = tchebycheff(offspring_fitness, population.reference_point, population.weights[i]);
             double fitness2 = tchebycheff(population.fitness_list[index], population.reference_point, population.weights[i]);
+
             if (fitness1 < fitness2) {
                 population.individual_list[index] = offspring;
                 population.fitness_list[index] = offspring_fitness;
+                ++replaced_solution_count;
             }
         }
 

@@ -23,6 +23,9 @@ struct MOEADOptions {
     double crossover_rate = 0.95;
     double mutation_rate = 0.1;
 
+    int maximum_number_of_replaced_solution_each_child = population_size;
+    double select_parent_from_whole_population_probability = 0.0;
+
     PopulationInitializationAlgorithm initialization = nullptr;
     WeightsInitializationAlgorithm generate_weights = nullptr;
     CrossoverAlgorithm crossover = nullptr;
